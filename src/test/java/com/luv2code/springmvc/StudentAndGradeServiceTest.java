@@ -1,12 +1,18 @@
 package com.luv2code.springmvc;
 
 import com.luv2code.springmvc.models.CollegeStudent;
+import com.luv2code.springmvc.models.HistoryGrade;
+import com.luv2code.springmvc.models.MathGrade;
+import com.luv2code.springmvc.models.ScienceGrade;
+import com.luv2code.springmvc.repository.MathGradesDao;
+import com.luv2code.springmvc.repository.ScienceGradesDao;
 import com.luv2code.springmvc.repository.StudentDao;
 import com.luv2code.springmvc.service.StudentAndGradeService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
@@ -26,9 +32,15 @@ public class StudentAndGradeServiceTest {
     private JdbcTemplate jdbc;
 
     @Autowired
-    StudentAndGradeService studentService;
+    private StudentAndGradeService studentService;
     @Autowired
-    StudentDao studentDao;
+    private StudentDao studentDao;
+
+    @Autowired
+    private MathGradesDao mathGradeDao;
+
+    @Autowired
+    private ScienceGradesDao scienceGradeDao;
 
     @BeforeEach
     public void setupDatabase () {
@@ -68,6 +80,24 @@ public class StudentAndGradeServiceTest {
             collegeStudents.add(collegeStudent);
         }
         assertEquals(5,collegeStudents.size());
+    }
+
+    @Test
+    public void createGradeService () {
+        // create the grade
+        assertTrue(studentService.createGrade(80.50,1,"math"));
+        assertTrue(studentService.createGrade(80.50,1,"science"));
+        assertTrue(studentService.createGrade(80.50,1,"history"));
+
+        // get all grades with studentID
+        Iterable<MathGrade> mathGrades = mathGradeDao.findGradeByStudentId(1);
+        Iterable<ScienceGrade> scienceGrades = scienceGradeDao.findGradeByStudentId(1);
+       // Iterable<HistoryGrade> historyGrades =
+
+        // verify there are grades in the DB
+        assertTrue(mathGrades.iterator().hasNext(),"Student has math grades");
+        assertTrue(scienceGrades.iterator().hasNext());
+
     }
 
     @AfterEach
