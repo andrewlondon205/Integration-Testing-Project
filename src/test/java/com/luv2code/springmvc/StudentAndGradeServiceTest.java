@@ -33,7 +33,7 @@ public class StudentAndGradeServiceTest {
     @BeforeEach
     public void setupDatabase () {
         jdbc.execute("insert into student(id,firstname,lastname,email_address)" +
-                "values (60,'Eric','Roby','eric.roby@luv2code_school.com')");
+                "values (1,'Eric','Roby','eric.roby@luv2code_school.com')");
     }
 
     @Test
