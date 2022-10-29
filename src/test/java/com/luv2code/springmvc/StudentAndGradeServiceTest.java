@@ -4,6 +4,7 @@ import com.luv2code.springmvc.models.CollegeStudent;
 import com.luv2code.springmvc.models.HistoryGrade;
 import com.luv2code.springmvc.models.MathGrade;
 import com.luv2code.springmvc.models.ScienceGrade;
+import com.luv2code.springmvc.repository.HistoryGradesDao;
 import com.luv2code.springmvc.repository.MathGradesDao;
 import com.luv2code.springmvc.repository.ScienceGradesDao;
 import com.luv2code.springmvc.repository.StudentDao;
@@ -42,10 +43,19 @@ public class StudentAndGradeServiceTest {
     @Autowired
     private ScienceGradesDao scienceGradeDao;
 
+    @Autowired
+    private HistoryGradesDao historyGradeDao;
+
     @BeforeEach
     public void setupDatabase () {
         jdbc.execute("insert into student(id,firstname,lastname,email_address)" +
                 "values (1,'Eric','Roby','eric.roby@luv2code_school.com')");
+
+        jdbc.execute("insert into math_grade(id,student_id,grade) values (1,1,100.00)");
+
+        jdbc.execute("insert into science_grade(id,student_id,grade) values (1,1,100.00)");
+
+        jdbc.execute("insert into history_grade(id,student_id,grade) values (1,1,100.00)");
     }
 
     @Test
@@ -92,16 +102,28 @@ public class StudentAndGradeServiceTest {
         // get all grades with studentID
         Iterable<MathGrade> mathGrades = mathGradeDao.findGradeByStudentId(1);
         Iterable<ScienceGrade> scienceGrades = scienceGradeDao.findGradeByStudentId(1);
-       // Iterable<HistoryGrade> historyGrades =
+        Iterable<HistoryGrade> historyGrades = historyGradeDao.findGradeByStudentId(1);
 
         // verify there are grades in the DB
         assertTrue(mathGrades.iterator().hasNext(),"Student has math grades");
         assertTrue(scienceGrades.iterator().hasNext());
+        assertTrue(historyGrades.iterator().hasNext());
+    }
+
+    @Test
+    public void createGradeServiceReturnFalse () {
+        assertFalse(studentService.createGrade(105,1,"math"));
+        assertFalse(studentService.createGrade(-5,1,"math"));
+        assertFalse(studentService.createGrade(80.50,2,"math"));
+        assertFalse(studentService.createGrade(80.50,1,"literature"));
 
     }
 
     @AfterEach
     public void setupAfterTransaction () {
         jdbc.execute("DELETE FROM student");
+        jdbc.execute("DELETE FROM math_grade");
+        jdbc.execute("DELETE FROM science_grade");
+        jdbc.execute("DELETE FROM history_grade")   ;
     }
 }
