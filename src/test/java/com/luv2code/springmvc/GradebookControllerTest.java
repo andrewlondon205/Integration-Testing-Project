@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.xml.crypto.dsig.spec.ExcC14NParameterSpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,6 +52,30 @@ public class GradebookControllerTest {
     @Mock
     private StudentAndGradeService studentCreateServiceMock;
 
+    @Value("${sql.script.create.student}")
+    private String sqlAddStudent;
+
+    @Value("${sql.script.create.math.grade}")
+    private String sqlAddMathGrade;
+
+    @Value("${sql.script.create.science.grade}")
+    private String sqlAddScienceGrade;
+
+    @Value("${sql.script.create.history.grade}")
+    private String sqlAddHistoryGrade;
+
+    @Value("${sql.script.delete.student}")
+    private String sqlDeleteStudent;
+
+    @Value("${sql.script.delete.math.grade}")
+    private String sqlDeleteMathGrade;
+
+    @Value("${sql.script.delete.science.grade}")
+    private String sqlDeleteScienceGrade;
+
+    @Value("${sql.script.delete.history.grade}")
+    private String sqlDeleteHistoryGrade;
+
     @BeforeAll
     public static void setup () {
         request = new MockHttpServletRequest();
@@ -61,8 +87,10 @@ public class GradebookControllerTest {
 
     @BeforeEach
     public void beforeEach() {
-        jdbc.execute("insert into student(id,firstname,lastname,email_address)" +
-                "values (1,'Eric','Roby','eric.roby@luv2code_school.com')");
+        jdbc.execute(sqlAddStudent);
+        jdbc.execute(sqlAddMathGrade);
+        jdbc.execute(sqlAddScienceGrade);
+        jdbc.execute(sqlAddHistoryGrade);
     }
 
     @Test
@@ -88,11 +116,8 @@ public class GradebookControllerTest {
 
         CollegeStudent studentOne = new CollegeStudent("Ramai","Alexandria","ramai_alexandria@liceokeplero.it");
         List<CollegeStudent> collegeStudentList = new ArrayList<>(Arrays.asList(studentOne));
-
         when(studentCreateServiceMock.getGradebook()).thenReturn(collegeStudentList);
-
         assertIterableEquals(collegeStudentList,studentCreateServiceMock.getGradebook());
-
         MvcResult mvcResult = this.mockMvc.perform(post("/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("firstname",request.getParameterValues("firstname"))
@@ -102,9 +127,7 @@ public class GradebookControllerTest {
 
         ModelAndView mav = mvcResult.getModelAndView();
         ModelAndViewAssert.assertViewName(mav,"index");
-
         CollegeStudent verifyStudent = studentDao.findByEmailAddress("ramai_alexandria@liceokeplero.it");
-
         assertNotNull(verifyStudent,"Student should be found");
     }
 
@@ -114,7 +137,6 @@ public class GradebookControllerTest {
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                 .get("/delete/student/{id}",1))
                 .andExpect(status().isOk()).andReturn();
-
         ModelAndView mav = mvcResult.getModelAndView();
         ModelAndViewAssert.assertViewName(mav,"index");
         assertFalse(studentDao.findById(1).isPresent());
@@ -125,14 +147,31 @@ public class GradebookControllerTest {
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                 .get("/delete/student/{id}",0))
                 .andExpect(status().isOk()).andReturn();
-
         ModelAndView mav = mvcResult.getModelAndView();
         ModelAndViewAssert.assertViewName(mav,"error");
+    }
+
+    @Test
+    public void studentInformationHttpRequest() throws Exception {
+        assertTrue(studentDao.findById(1).isPresent());
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
+                .get("/student/information/{id}",1))
+                .andExpect(status().isOk())
+                .andReturn();
+        ModelAndView mav = mvcResult.getModelAndView();
+        ModelAndViewAssert.assertViewName(mav,"studentInformation");
+    }
+
+    @Test
+    public void studentInformationHttpStudentDoesNotExist () throws Exception {
 
     }
 
     @AfterEach
     public void afterEach () {
-        jdbc.execute("DELETE FROM student");
+        jdbc.execute(sqlDeleteStudent);
+        jdbc.execute(sqlDeleteMathGrade);
+        jdbc.execute(sqlDeleteScienceGrade);
+        jdbc.execute(sqlDeleteHistoryGrade);
     }
 }
