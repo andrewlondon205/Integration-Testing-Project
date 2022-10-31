@@ -1,7 +1,6 @@
 package com.luv2code.springmvc;
 
 import com.luv2code.springmvc.models.CollegeStudent;
-import com.luv2code.springmvc.models.Gradebook;
 import com.luv2code.springmvc.models.GradebookCollegeStudent;
 import com.luv2code.springmvc.models.MathGrade;
 import com.luv2code.springmvc.repository.MathGradesDao;
@@ -25,20 +24,17 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.servlet.ModelAndView;
-
-import javax.xml.crypto.dsig.spec.ExcC14NParameterSpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@TestPropertySource("/application.properties")
+@TestPropertySource("/application-test.properties")
 @AutoConfigureMockMvc
 @SpringBootTest
 public class GradebookControllerTest {
